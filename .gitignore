@@ -31,3 +31,11 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Custom
+trab3
+scanner.*
+parser.*
+tree.pdf
+tree.dot
+in/
