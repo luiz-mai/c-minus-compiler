@@ -1,7 +1,14 @@
 #ifndef TREE_H
 #define TREE_H
 
-struct node; // Opaque structure to ensure encapsulation.
+#define CHILDREN_LIMIT 7
+#define TEXT_LIMIT 256
+
+struct node {
+    char text[TEXT_LIMIT];
+    int count;
+    struct node* child[CHILDREN_LIMIT];
+};
 
 typedef struct node Tree;
 

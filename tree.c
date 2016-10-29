@@ -5,14 +5,6 @@
 #include <string.h>
 #include "tree.h"
 
-#define CHILDREN_LIMIT 7
-#define TEXT_LIMIT 256
-
-struct node {
-    char text[TEXT_LIMIT];
-    int count;
-    Tree* child[CHILDREN_LIMIT];
-};
 
 Tree* new_node(const char *text) {
     Tree* node = malloc(sizeof * node);

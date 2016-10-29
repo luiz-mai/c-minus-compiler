@@ -1,18 +1,14 @@
-
-all: tree bison flex gcc
+all: bison flex gcc
 	@echo "Done."
 
-tree: tree.c
-	gcc -c tree.c
+bison: trab.y
+	bison -v trab.y
 
-bison: trab3.y
-	bison -v trab3.y
+flex: trab.l
+	flex trab.l
 
-flex: trab3.l
-	flex trab3.l
-
-gcc: scanner.c parser.c tree.o
-	gcc -Wall -o trab3 scanner.c parser.c tree.o -ly
+gcc: scanner.c parser.c tree.c literalsTable.c symbolsTable.c
+	gcc -Wall -o trab3 scanner.c parser.c tree.c literalsTable.c symbolsTable.c -ly
 
 clean:
-	@rm -f *.o *.output scanner.c parser.h parser.c trab3
+	@rm -f *.pdf *.o *.output scanner.c parser.h parser.c trab3
