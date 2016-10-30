@@ -4,13 +4,16 @@
 #define CHILDREN_LIMIT 7
 #define TEXT_LIMIT 256
 
+struct node;
+
+typedef struct node Tree;
+
 struct node {
     char text[TEXT_LIMIT];
     int count;
-    struct node* child[CHILDREN_LIMIT];
+    Tree* child[CHILDREN_LIMIT];
 };
 
-typedef struct node Tree;
 
 Tree* new_node(const char *text);
 

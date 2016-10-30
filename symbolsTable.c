@@ -19,15 +19,24 @@ int symbolExists(SymbolsTable* st, char* symbol){
         return 0;
 }
 
-int addSymbol(SymbolsTable* st, char* symbol, int line){
-        if(symbolExists(st, symbol)) return -1;
+int addSymbol(SymbolsTable* st, char* symbol, int line, int scope, int arity){
+
         SymbolNode* newNode = (SymbolNode*)malloc(sizeof(SymbolNode));
         strcpy(newNode->symbol, symbol);
         newNode->line = line;
+        if(scope != -1) newNode->scope = scope;
+        if(arity != -1) newNode->arity = arity;
         newNode->next = NULL;
-        st->tail->next = newNode;
+
+        if(st->head == NULL){
+          st->head = newNode;
+          st->tail = newNode;
+        } else{
+          st->tail->next = newNode;
+          st->tail = newNode;
+        }
         st->size++;
-        st->tail = newNode;
+
         return 0;
 }
 
@@ -42,15 +51,53 @@ int getSymbolLine(SymbolsTable* st, char* symbol){
   return -1;
 }
 
-void printSymbolsTable(SymbolsTable* st) {
-        printf("The Symbols Table has %d entries, which are:\n", st->size);
+
+int getSymbolScope(SymbolsTable* st, char* symbol){
+  SymbolNode* current = st->head;
+  while (current != NULL) {
+          if(strcmp(current->symbol, symbol) == 0){
+            return current->scope;
+          }
+          current = current->next;
+  }
+  return -1;
+}
+
+
+int getSymbolArity(SymbolsTable* st, char* symbol){
+  SymbolNode* current = st->head;
+  while (current != NULL) {
+          if(strcmp(current->symbol, symbol) == 0){
+            return current->arity;
+          }
+          current = current->next;
+  }
+  return -1;
+}
+
+void printVariablesTable(SymbolsTable* st) {
+    printf("\nVariables table:");
+    SymbolNode* current = st->head;
+    int i = 0;
+    while (current != NULL) {
+            printf("\nEntry %d -- name: %s, line: %d, scope: %d", i, current->symbol, current->line, current->scope);
+            current = current->next;
+            i++;
+    }
+    printf("\n\n");
+    return;
+}
+
+void printFunctionsTable(SymbolsTable* st) {
+        printf("\nFunctions table:");
         SymbolNode* current = st->head;
-        int i = 1;
+        int i = 0;
         while (current != NULL) {
-                printf("Entry %d is %s, located at line %d\n", i, current->symbol, current->line);
+                printf("\nEntry %d -- name: %s, line: %d, arity: %d", i, current->symbol, current->line, current->arity);
                 current = current->next;
                 i++;
         }
+        printf("\n");
         return;
 }
 

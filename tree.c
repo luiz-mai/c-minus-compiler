@@ -6,6 +6,7 @@
 #include "tree.h"
 
 
+
 Tree* new_node(const char *text) {
     Tree* node = malloc(sizeof * node);
     strcpy(node->text, text);
@@ -58,25 +59,4 @@ void free_tree(Tree *tree) {
         free_tree(tree->child[i]);
     }
     free(tree);
-}
-
-// Dot output.
-
-int nr;
-
-int print_node_dot(Tree *node) {
-    int my_nr = nr++;
-    printf("node%d[label=\"%s\"];\n", my_nr, node->text);
-    for (int i = 0; i < node->count; i++) {
-        int child_nr = print_node_dot(node->child[i]);
-        printf("node%d -> node%d;\n", my_nr, child_nr);
-    }
-    return my_nr;
-}
-
-void print_dot(Tree *tree) {
-    nr = 0;
-    printf("digraph {\ngraph [ordering=\"out\"];\n");
-    print_node_dot(tree);
-    printf("}\n");
 }

@@ -21,24 +21,33 @@ int literalExists(LiteralsTable* lt, char* literal){
 
 int addLiteral(LiteralsTable* lt, char* literal){
         if(literalExists(lt, literal)) return -1;
+
         LiteralNode* newNode = (LiteralNode*)malloc(sizeof(LiteralNode));
         strcpy(newNode->literal, literal);
         newNode->next = NULL;
-        lt->tail->next = newNode;
+
+        if(lt->head == NULL){
+          lt->head = newNode;
+          lt->tail = newNode;
+        } else{
+          lt->tail->next = newNode;
+          lt->tail = newNode;
+        }
         lt->size++;
-        lt->tail = newNode;
+
         return 0;
 }
 
 void printLiteralsTable(LiteralsTable* lt) {
-        printf("The Literals Table has %d entries, which are:\n", lt->size);
+        printf("\nLiterals table:");
         LiteralNode* current = lt->head;
-        int i = 1;
+        int i = 0;
         while (current != NULL) {
-                printf("Entry %d is %s\n", i, current->literal);
+                printf("\nEntry %d -- %s", i, current->literal);
                 current = current->next;
                 i++;
         }
+        printf("\n\n");
         return;
 }
 

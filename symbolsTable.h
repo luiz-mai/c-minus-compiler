@@ -6,6 +6,8 @@
 typedef struct symNode {
         char symbol[WORD_MAX_SIZE];
         int line;
+        int scope;
+        int arity;
         struct symNode* next;
 } SymbolNode;
 
@@ -19,10 +21,16 @@ SymbolsTable* createSymbolsTable(void);
 
 int symbolExists(SymbolsTable*, char*);
 
-int addSymbol(SymbolsTable*, char*, int);
+int addSymbol(SymbolsTable*, char*, int, int, int);
 
 int getSymbolLine(SymbolsTable*, char*);
 
-void printSymbolsTable(SymbolsTable*);
+int getSymbolScope(SymbolsTable*, char*);
+
+int getSymbolArity(SymbolsTable*, char*);
+
+void printVariablesTable(SymbolsTable*);
+
+void printFunctionsTable(SymbolsTable*);
 
 void freeSymbolsTable(SymbolsTable*);

@@ -1,16 +1,3 @@
-/*################################################################################
-##										##
-##			   TRABALHO 2 DE COMPILADORES				##
-##			    Luiz Felipe Ferreira Mai				##
-##										##
-##			       Prof. Eduardo Zambon				##
-##				      2016/2					##
-##										##
-##										##
-##			Melhor visualizado com tabulação 8			##
-##										##
-################################################################################*/
-
 /*Configuração*/
 %option outfile="scanner.c"
 %option noyywrap
