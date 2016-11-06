@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "tree.h"
 #define WORD_MAX_SIZE 128
 
 typedef struct symNode {
@@ -28,6 +29,8 @@ int getSymbolLine(SymbolsTable*, char*);
 int getSymbolScope(SymbolsTable*, char*);
 
 int getSymbolArity(SymbolsTable*, char*);
+
+int getSymbolIndex(SymbolsTable*, Tree*, int);
 
 void printVariablesTable(SymbolsTable*);
 

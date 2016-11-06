@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "tree.h"
 #define WORD_MAX_SIZE 128
 
 typedef struct litNode {
@@ -17,6 +18,8 @@ typedef struct litTable {
 LiteralsTable* createLiteralsTable(void);
 
 int literalExists(LiteralsTable* lt, char* literal);
+
+int getLiteralIndex(LiteralsTable* lt, Tree* literal);
 
 int addLiteral(LiteralsTable* lt, char* literal);
 

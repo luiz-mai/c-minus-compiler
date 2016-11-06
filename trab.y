@@ -48,100 +48,99 @@ int scope = 0;
 
 %%
 
-program: funcDeclList																{ tree = new_subtree("program", 1, $1); };
+program: funcDeclList																{ tree = $1; };
 
 funcDeclList: funcDecl															{ $$ = new_subtree("funcDeclList", 1, $1); }
-| funcDeclList funcDecl															{ $$ = new_subtree("funcDeclList", 2, $1, $2); };
+| funcDeclList funcDecl															{ $$ = add_child($$, $2); };
 
 funcDecl: funcHeader funcBody												{ scope++; $$ = new_subtree("funcDecl", 2, $1, $2); };
 
-funcHeader: retType ID LPAREN params RPAREN					{ newSymbol("function", $2, yylineno, -1, declaredArity); declaredArity = 0;  $$ = new_subtree("funcHeader", 5, $1, $2, $3, $4, $5); };
+funcHeader: retType ID LPAREN params RPAREN					{ newSymbol("function", $2, yylineno, -1, declaredArity); declaredArity = 0;  $$ = new_subtree("funcHeader", 3, $1, new_custom_node("id", getSymbolIndex(funct, $2, -1)), $4); };
 
-funcBody: LBRACE optVarDecl optStmtList RBRACE			{ $$ = new_subtree("funcBody", 4, $1, $2, $3, $4); };
+funcBody: LBRACE optVarDecl optStmtList RBRACE			{ $$ = new_subtree("funcBody", 2, $2, $3); };
 
-optVarDecl: %empty																	{ $$ = new_subtree("optVarDecl", 1, ""); };
-| varDeclList																				{ $$ = new_subtree("optVarDecl", 1, $1); };
+optVarDecl: %empty																	{ $$ = new_subtree("varList", 0); };
+| varDeclList																				{ $$ = $1; };
 
-optStmtList: %empty																	{ $$ = new_subtree("optStmtList", 1, ""); };
-| stmtList																					{ $$ = new_subtree("optStmtList", 1, $1); };
+retType: INT																				{ $$ = new_node("INT"); }
+| VOID																							{ $$ = new_node("VOID"); };
 
-retType: INT																				{ $$ = new_subtree("retType", 1, $1); }
-| VOID																							{ $$ = new_subtree("retType", 1, $1); };
+params: VOID																				{ $$ = new_node("VOID"); }
+| paramList																					{ $$ = $1; };
 
-params: VOID																				{ $$ = new_subtree("params", 1, $1); }
-| paramList																					{ $$ = new_subtree("params", 1, $1); };
+paramList: param																		{ $$ = new_subtree("param", 1, $1); }
+| paramList COMMA param															{ $$ = add_child($$, $3); };
 
-paramList: param																		{ $$ = new_subtree("paramList", 1, $1); }
-| paramList COMMA param															{ $$ = new_subtree("paramList", 3, $1, $2, $3); };
+param: INT ID																				{ declaredArity++; newSymbol("variable", $2, yylineno, scope, -1); $$ = new_custom_node("svar", getSymbolIndex(vart, $2, scope)); }
+| INT ID LBRACK RBRACK															{ declaredArity++; newSymbol("variable", $2, yylineno, scope, -1); $$ = new_custom_node("cvar", getSymbolIndex(vart, $2, scope)); };
 
-param: INT ID																				{ declaredArity++; newSymbol("variable", $2, yylineno, scope, -1); $$ = new_subtree("param", 2, $1, $2); }
-| INT ID LBRACK RBRACK															{ declaredArity++; newSymbol("variable", $2, yylineno, scope, -1); $$ = new_subtree("param", 4, $1, $2, $3, $4); };
+varDeclList: varDecl																{ $$ = new_subtree("varList", 1, $1); }
+| varDeclList varDecl																{ $$ = add_child($$, $2); };
 
-varDeclList: varDecl																{ $$ = new_subtree("varDeclList", 1, $1); }
-| varDeclList varDecl																{ $$ = new_subtree("varDeclList", 2, $1, $2); };
+varDecl: INT ID SEMI																{ newSymbol("variable", $2, yylineno, scope, -1); $$ = new_custom_node("svar", getSymbolIndex(vart, $2, scope));  }
+| INT ID LBRACK NUM RBRACK SEMI											{ newSymbol("variable", $2, yylineno, scope, -1); Tree* varDeclNode = new_custom_node("cvar", getSymbolIndex(vart, $2, scope)); $$ = add_child(varDeclNode, new_custom_node("num", atoi(get_node_text($4)))); };
 
-varDecl: INT ID SEMI																{ newSymbol("variable", $2, yylineno, scope, -1); $$ = new_subtree("varDecl", 3, $1, $2, $3); }
-| INT ID LBRACK NUM RBRACK SEMI											{ newSymbol("variable", $2, yylineno, scope, -1); $$ = new_subtree("varDecl", 6, $1, $2, $3, $4, $5, $6); };
+block: LBRACE optStmtList RBRACE										{ $$ = $2; };
 
-stmtList: stmt																			{ $$ = new_subtree("stmtList", 1, $1); }
-| stmtList stmt																			{ $$ = new_subtree("stmtList", 2, $1, $2); };
+optStmtList: stmtList															  { };
 
-stmt: assignStmt																		{ $$ = new_subtree("stmt", 1, $1); }
-| ifStmt																						{ $$ = new_subtree("stmt", 1, $1); }
-| whileStmt																					{ $$ = new_subtree("stmt", 1, $1); }
-| returnStmt																				{ $$ = new_subtree("stmt", 1, $1); }
-| funcCall SEMI																			{ $$ = new_subtree("stmt", 2, $1, $2); };
+stmtList: %empty																		{ $$ = new_subtree("stmtList", 0); }
+| stmtList stmt																			{ $$ = add_child($$, $2); };
 
-assignStmt: lval ASSIGN arithExpr SEMI							{ $$ = new_subtree("assignStmt", 4, $1, $2, $3, $4); };
+stmt: assignStmt																		{ $$ = $1; }
+| ifStmt																						{ $$ = $1; }
+| whileStmt																					{ $$ = $1; }
+| returnStmt																				{ $$ = $1; }
+| funcCall SEMI																			{ $$ = $1; };
 
-lval: ID																						{ checkSymbol("variable", $1, yylineno, scope, -1); $$ = new_subtree("lval", 1, $1); }
-| ID LBRACK NUM RBRACK															{ checkSymbol("variable", $1, yylineno, scope, -1); $$ = new_subtree("lval", 4, $1, $2, $3, $4); }
-| ID LBRACK ID RBRACK																{ checkSymbol("variable", $1, yylineno, scope, -1);  checkSymbol("variable", $3, yylineno, scope, -1); $$ = new_subtree("lval", 4, $1, $2, $3, $4); };
+assignStmt: lval ASSIGN arithExpr SEMI							{ $$ = new_subtree("=", 2, $1, $3); };
 
-ifStmt: IF LPAREN boolExpr RPAREN block							{ $$ = new_subtree("ifStmt", 5, $1, $2, $3, $4, $5); }
-| IF LPAREN boolExpr RPAREN block ELSE block				{ $$ = new_subtree("ifStmt", 7, $1, $2, $3, $4, $5, $6, $7); };
+lval: ID																						{ checkSymbol("variable", $1, yylineno, scope, -1); $$ = new_custom_node("svar", getSymbolIndex(vart, $1, scope)); }
+| ID LBRACK NUM RBRACK															{ checkSymbol("variable", $1, yylineno, scope, -1);   }
+| ID LBRACK ID RBRACK																{ checkSymbol("variable", $1, yylineno, scope, -1);  checkSymbol("variable", $3, yylineno, scope, -1); Tree* lvalNode = new_custom_node("cvar", getSymbolIndex(vart, $1, scope)); add_child(lvalNode, $$ = new_custom_node("svar", getSymbolIndex(vart, $3, scope))); $$ = lvalNode;};
 
-block: LBRACE optStmtList RBRACE										{ $$ = new_subtree("block", 3, $1, $2, $3); };
+ifStmt: IF  LPAREN boolExpr RPAREN block							{ $$ = new_subtree("if", 2, $3, $5); }
+| IF LPAREN boolExpr RPAREN block ELSE block				{ $$ = new_subtree("if", 3, $3, $5, $7); };
 
-whileStmt: WHILE LPAREN boolExpr RPAREN block				{ $$ = new_subtree("whileStmt", 5, $1, $2, $3, $4, $5); };
+whileStmt: WHILE LPAREN boolExpr RPAREN block				{ $$ = new_subtree("while", 2, $3, $5); };
 
-returnStmt: RETURN SEMI															{ $$ = new_subtree("returnStmt", 2, $1, $2); }
-| RETURN arithExpr SEMI															{ $$ = new_subtree("returnStmt", 3, $1, $2, $3); };
+returnStmt: RETURN SEMI															{ $$ = new_subtree("return", 0); }
+| RETURN arithExpr SEMI															{ $$ = new_subtree("return", 1, $2); };
 
-funcCall: outputCall																{ $$ = new_subtree("funcCall", 1, $1); }
-| writeCall																					{ $$ = new_subtree("funcCall", 1, $1); }
-| userFuncCall																			{ $$ = new_subtree("funcCall", 1, $1); };
+funcCall: outputCall																{ $$ = $1; }
+| writeCall																					{ $$ = $1; }
+| userFuncCall																			{ $$ = $1; };
 
-inputCall: INPUT LPAREN RPAREN											{ $$ = new_subtree("inputCall", 3, $1, $2, $3); };
+inputCall: INPUT LPAREN RPAREN											{ $$ = $1; };
 
-outputCall: OUTPUT LPAREN arithExpr RPAREN					{ $$ = new_subtree("outputCall", 4, $1, $2, $3, $4); };
+outputCall: OUTPUT LPAREN arithExpr RPAREN					{ $$ = new_subtree("output", 1, $3); };
 
-writeCall: WRITE LPAREN STRING RPAREN								{ $$ = new_subtree("writeCall", 4, $1, $2, $3, $4); };
+writeCall: WRITE LPAREN STRING RPAREN								{ $$ = new_subtree("write", 1, new_custom_node("string", getLiteralIndex(lt, $3))); };
 
-userFuncCall: ID LPAREN optArgList RPAREN						{ checkSymbol("function", $1, yylineno, -1, calledArity); calledArity = 0; $$ = new_subtree("userFuncCall", 4, $1, $2, $3, $4); };
+userFuncCall: ID LPAREN optArgList RPAREN						{ checkSymbol("function", $1, yylineno, -1, calledArity); calledArity = 0; Tree* fcall = new_custom_node("fcall", getSymbolIndex(funct, $1, -1)); $$ = add_child(fcall, $3);};
 
-optArgList: %empty																	{ $$ = new_subtree("optArgList", 1, ""); };
-| argList																						{ $$ = new_subtree("optArgList", 1, $1); };
+optArgList: %empty																	{  };
+| argList																						{ $$ = $1; };
 
 argList: arithExpr																	{ calledArity++; $$ = new_subtree("argList", 1, $1); }
-| argList COMMA arithExpr														{ calledArity++; $$ = new_subtree("argList", 3, $1, $2, $3); };
+| argList COMMA arithExpr														{ calledArity++; $$ = add_child($$, $3); };
 
-boolExpr: arithExpr LT arithExpr										{ $$ = new_subtree("boolExpr", 3, $1, $2, $3); }
-| arithExpr LE arithExpr														{ $$ = new_subtree("boolExpr", 3, $1, $2, $3); }
-| arithExpr GT arithExpr														{ $$ = new_subtree("boolExpr", 3, $1, $2, $3); }
-| arithExpr GE arithExpr														{ $$ = new_subtree("boolExpr", 3, $1, $2, $3); }
-| arithExpr EQ arithExpr														{ $$ = new_subtree("boolExpr", 3, $1, $2, $3); }
-| arithExpr NEQ arithExpr														{ $$ = new_subtree("boolExpr", 3, $1, $2, $3); };
+boolExpr: arithExpr LT arithExpr										{ $$ = new_subtree("<", 2, $1, $3); }
+| arithExpr LE arithExpr														{ $$ = new_subtree("<=", 2, $1, $3); }
+| arithExpr GT arithExpr														{ $$ = new_subtree(">", 2, $1, $3); }
+| arithExpr GE arithExpr														{ $$ = new_subtree(">=", 2, $1, $3); }
+| arithExpr EQ arithExpr														{ $$ = new_subtree("==", 2, $1, $3); }
+| arithExpr NEQ arithExpr														{ $$ = new_subtree("!=", 2, $1, $3); };
 
-arithExpr: NUM																			{ $$ = new_subtree("arithExpr", 1, $1); }
-| inputCall																					{ $$ = new_subtree("arithExpr", 1, $1); }
-| lval																							{ $$ = new_subtree("arithExpr", 1, $1); }
-| userFuncCall																			{ $$ = new_subtree("arithExpr", 1, $1); }
-| LPAREN arithExpr RPAREN														{ $$ = new_subtree("arithExpr", 3, $1, $2, $3); }
-| arithExpr PLUS arithExpr													{ $$ = new_subtree("arithExpr", 3, $1, $2, $3); }
-| arithExpr MINUS arithExpr													{ $$ = new_subtree("arithExpr", 3, $1, $2, $3); }
-| arithExpr TIMES arithExpr													{ $$ = new_subtree("arithExpr", 3, $1, $2, $3); }
-| arithExpr OVER arithExpr													{ $$ = new_subtree("arithExpr", 3, $1, $2, $3); };
+arithExpr: NUM																			{ $$ = new_custom_node("num", atoi(get_node_text($1))); }
+| inputCall																					{ $$ = $1; }
+| lval																							{ $$ = $1; }
+| userFuncCall																			{ $$ = $1; }
+| LPAREN arithExpr RPAREN														{ $$ = $2; }
+| arithExpr PLUS arithExpr													{ $$ = new_subtree("+", 2, $1, $3); }
+| arithExpr MINUS arithExpr													{ $$ = new_subtree("-", 2, $1, $3); }
+| arithExpr TIMES arithExpr													{ $$ = new_subtree("*", 2, $1, $3); }
+| arithExpr OVER arithExpr													{ $$ = new_subtree("/", 2, $1, $3); };
 
 %%
 
@@ -162,7 +161,7 @@ int main() {
   freeSymbolsTable(vart);
   freeSymbolsTable(funct);
   freeLiteralsTable(lt);
-	//TODO: FREE TREE;
+	free_tree(tree);
 	return 0;
 }
 
@@ -206,7 +205,6 @@ void newSymbol(char* type, Tree* node, int line, int scope, int declaredArity) {
             line, node->text, getSymbolLine(funct, node->text));
         exit(1);
     }
-
     addSymbol(funct, node->text, line, scope, declaredArity);
   }
 }

@@ -10,11 +10,13 @@ LiteralsTable* createLiteralsTable(void){
 
 int literalExists(LiteralsTable* lt, char* literal){
         LiteralNode* current = lt->head;
+        int i = 0;
         while (current != NULL) {
                 if (strcmp(current->literal, literal) == 0) {
-                        return 1;
+                        return i;
                 }
                 current = current->next;
+                i++;
         }
         return 0;
 }
@@ -26,15 +28,28 @@ int addLiteral(LiteralsTable* lt, char* literal){
         strcpy(newNode->literal, literal);
         newNode->next = NULL;
 
-        if(lt->head == NULL){
-          lt->head = newNode;
-          lt->tail = newNode;
+        if(lt->head == NULL) {
+                lt->head = newNode;
+                lt->tail = newNode;
         } else{
-          lt->tail->next = newNode;
-          lt->tail = newNode;
+                lt->tail->next = newNode;
+                lt->tail = newNode;
         }
         lt->size++;
 
+        return 0;
+}
+
+int getLiteralIndex(LiteralsTable* lt, Tree* literal){
+        LiteralNode* current = lt->head;
+        int i = 0;
+        while (current != NULL) {
+                if (strcmp(current->literal, literal->text) == 0) {
+                        return i;
+                }
+                current = current->next;
+                i++;
+        }
         return 0;
 }
 
