@@ -153,9 +153,6 @@ int main() {
 
 	if(yyparse() == 0){
 		printf("PARSE SUCESSFUL!\n");
-		printLiteralsTable(lt);
-    printVariablesTable(vart);
-    printFunctionsTable(funct);
 	}
 
   freeSymbolsTable(vart);

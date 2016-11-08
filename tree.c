@@ -5,39 +5,49 @@
 #include "tree.h"
 
 Tree* new_node(const char *text) {
-        Tree* node = malloc(sizeof *node);
+        Tree* node = malloc(sizeof(Tree));
         strcpy(node->text, text);
+        node->child = malloc(CHILDREN_LIMIT * sizeof(Tree));
         node->count = 0;
+        node->allocated = 0;
         for (int i = 0; i < CHILDREN_LIMIT; i++) {
                 node->child[i] = NULL;
+                node->allocated++;
         }
         return node;
 }
 
 Tree* new_custom_node(const char* type, int position) {
-        Tree* node = malloc(sizeof *node);
+        Tree* node = malloc(sizeof(Tree));
         char str[TEXT_LIMIT];
         sprintf(str, "%s,%d", type, position);
         strcpy(node->text, str);
+        node->child = malloc(CHILDREN_LIMIT*sizeof(Tree));
         node->count = 0;
+        node->allocated = 0;
         for (int i = 0; i < CHILDREN_LIMIT; i++) {
                 node->child[i] = NULL;
+                node->allocated++;
         }
         return node;
 }
 
 Tree* add_child(Tree *parent, Tree *child) {
-        parent->child[parent->count] = child;
-        parent->count++;
+
+        if(parent->count >= parent->allocated) {
+                parent->allocated++;
+                parent->child = realloc(parent->child, sizeof(Tree*) * parent->allocated);
+                parent->child[parent->count] = child;
+                parent->count++;
+        }
+        else{
+                parent->child[parent->count] = child;
+                parent->count++;
+        }
         return parent;
 }
 
 Tree* new_subtree(const char *text, int child_count, ...) {
-        if (child_count > CHILDREN_LIMIT) {
-                fprintf(stderr, "Too many children as arguments!\n");
-                exit(1);
-        }
-
         Tree* node = new_node(text);
         va_list ap;
         va_start(ap, child_count);
@@ -51,6 +61,7 @@ Tree* new_subtree(const char *text, int child_count, ...) {
 char* get_node_text(Tree* node){
         return node->text;
 }
+
 void print_node(Tree *node, int level) {
         printf("%d: Node -- Addr: %p -- Text: %s -- Count: %d\n",
                level, node, node->text, node->count);
@@ -64,7 +75,8 @@ void print_tree(Tree *tree) {
 }
 
 void free_tree(Tree *tree) {
-        for (int i = 0; i < tree->count; i++) {
+        if(tree == NULL) return;
+        for (int i = 0; i < tree->allocated; i++) {
                 free_tree(tree->child[i]);
         }
         free(tree);
