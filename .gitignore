@@ -36,6 +36,7 @@
 trab3
 scanner.*
 parser.*
-tree.pdf
+*.pdf
 tree.dot
 in/
+out4/
