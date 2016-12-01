@@ -53,6 +53,16 @@ int getLiteralIndex(LiteralsTable *lt, char *literal) {
   return 0;
 }
 
+char *getLiteral(LiteralsTable *lt, int index) {
+  LiteralNode *current = lt->head;
+  int i = 0;
+  while (i < index) {
+    current = current->next;
+    i++;
+  }
+  return current->literal;
+}
+
 void printLiteralsTable(LiteralsTable *lt) {
   printf("\nLiterals table:");
   LiteralNode *current = lt->head;

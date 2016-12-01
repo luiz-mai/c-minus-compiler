@@ -66,6 +66,8 @@ Tree *new_subtree(NodeKind kind, int child_count, ...);
 NodeKind get_node_kind(Tree *node);
 int get_node_data(Tree *node);
 
+int get_node_child_count(Tree *node);
+
 // Prints an user-friendly tree.
 void print_tree(Tree *tree);
 

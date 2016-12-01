@@ -21,6 +21,8 @@ int literalExists(LiteralsTable *lt, char *literal);
 
 int getLiteralIndex(LiteralsTable *lt, char *literal);
 
+char *getLiteral(LiteralsTable *lt, int index);
+
 int addLiteral(LiteralsTable *lt, char *literal);
 
 void printLiteralsTable(LiteralsTable *lt);

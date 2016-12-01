@@ -61,6 +61,8 @@ NodeKind get_node_kind(Tree *node) { return node->kind; }
 
 int get_node_data(Tree *node) { return node->data; }
 
+int get_node_child_count(Tree *node) { return node->count; }
+
 void print_node(Tree *node, int level) {
   char data[128];
   sprintf(data, "%d", node->data);
